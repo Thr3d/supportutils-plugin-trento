@@ -8,8 +8,54 @@ on:
   workflow_dispatch:
 
 jobs:
-  placeholder:
+  static-analysis:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder step
-        run: echo "This is a placeholder job."
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Read .tool-versions
+        id: tool-versions
+        uses: endorama/asdf-parse-tool-versions@v1.3.4
+
+      - name: Install shfmt
+        run: |
+          version="v${{ env.SHFMT_VERSION }}"
+          wget https://github.com/mvdan/sh/releases/download/${version}/shfmt_${version}_linux_amd64
+          chmod +x shfmt_${version}_linux_amd64
+          sudo mv shfmt_${version}_linux_amd64 /usr/local/bin/shfmt
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Install ShellCheck
+        run: |
+          set -e 
+          version="${{ env.SHELLCHECK_VERSION }}"
+          ARCH=$(uname -m)
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          wget -qO shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v${version}/shellcheck-v${version}.${OS}.${ARCH}.tar.xz
+          tar -xf shellcheck.tar.xz
+          sudo mv shellcheck-v${version} /usr/local/share/shellcheck
+          sudo ln -sf /usr/local/share/shellcheck/shellcheck /usr/local/bin/shellcheck
+      - name: Check for lint issues
+        run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Read .tool-versions
+        id: tool-versions
+        uses: endorama/asdf-parse-tool-versions@v1.3.4
+
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: ${{ env.BATS_VERSION }}
+
+      - name: Run tests
+        run: |
+          bats -r ./test
