@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.0 - 2025-11-27
+
+### What's Changed
+
+* Release version 3.0.0 (#13) @nelsonkopliku
+* Setup CI and develoment tools (#11) @balanza
+* Scaffold CI (#12) @balanza
+
+**Full Changelog**: https://github.com/trento-project/support/compare/2.5.2...3.0.0
+
 ## 2.5.2 - 2025-07-31
 
 ### What's Changed
